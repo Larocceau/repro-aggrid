@@ -75,20 +75,24 @@ open Feliz.AgGrid
 
 let private todoList model dispatch =
     Html.div [
-        prop.className "bg-white/80 rounded-md shadow-md p-4 w-5/6 lg:w-3/4 lg:max-w-2xl h-96"
+        prop.className "bg-white/80 rounded-md shadow-md p-4 w-5/6 lg:w-3/4 lg:max-w-2xl"
         prop.children [
-            AgGrid.grid [
+            Html.div [
+                prop.className (ThemeClass.Alpine + " h-96")
+                prop.children [
+                    AgGrid.grid [
+                        AgGrid.rowData model.Todos
+                        AgGrid.columnDefs [
 
-                AgGrid.rowData model.Todos
-                AgGrid.columnDefs [
-
-                    ColumnDef.create<string> [
-                        ColumnDef.headerName "Task"
-                        ColumnDef.valueGetter (fun x -> x.Description)
-                    ]
-                    ColumnDef.create<System.DateTime> [
-                        ColumnDef.headerName "Created"
-                        ColumnDef.valueGetter (fun x -> x.Created)
+                            ColumnDef.create<string> [
+                                ColumnDef.headerName "Task"
+                                ColumnDef.valueGetter (fun x -> x.Description)
+                            ]
+                            ColumnDef.create<System.DateTime> [
+                                ColumnDef.headerName "Created"
+                                ColumnDef.valueGetter (fun x -> x.Created)
+                            ]
+                        ]
                     ]
                 ]
             ]
