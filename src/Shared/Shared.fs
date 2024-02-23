@@ -2,7 +2,11 @@ namespace Shared
 
 open System
 
-type Todo = { Id: Guid; Description: string }
+type Todo = {
+    Id: Guid
+    Description: string
+    Created: DateTime
+}
 
 module Todo =
     let isValid (description: string) =
@@ -11,6 +15,7 @@ module Todo =
     let create (description: string) = {
         Id = Guid.NewGuid()
         Description = description
+        Created = DateTime.Now
     }
 
 module Route =

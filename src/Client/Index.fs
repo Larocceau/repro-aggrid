@@ -4,7 +4,7 @@ open Elmish
 open Fable.Remoting.Client
 open Shared
 
-type Model = { Todos: Todo list; Input: string }
+type Model = { Todos: Todo array; Input: string }
 
 type Msg =
     | GotTodos of Todo list
@@ -18,13 +18,18 @@ let todosApi =
     |> Remoting.buildProxy<ITodosApi>
 
 let init () =
-    let model = { Todos = []; Input = "" }
+    let model = { Todos = [||]; Input = "" }
     let cmd = Cmd.OfAsync.perform todosApi.getTodos () GotTodos
     model, cmd
 
 let update msg model =
     match msg with
-    | GotTodos todos -> { model with Todos = todos }, Cmd.none
+    | GotTodos todos ->
+        {
+            model with
+                Todos = (Array.ofList todos)
+        },
+        Cmd.none
     | SetInput value -> { model with Input = value }, Cmd.none
     | AddTodo ->
         let todo = Todo.create model.Input
@@ -35,7 +40,7 @@ let update msg model =
     | AddedTodo todo ->
         {
             model with
-                Todos = model.Todos @ [ todo ]
+                Todos = Array.append model.Todos [| todo |]
         },
         Cmd.none
 
@@ -66,18 +71,27 @@ let private todoAction model dispatch =
         ]
     ]
 
+open Feliz.AgGrid
+
 let private todoList model dispatch =
     Html.div [
-        prop.className "bg-white/80 rounded-md shadow-md p-4 w-5/6 lg:w-3/4 lg:max-w-2xl"
+        prop.className "bg-white/80 rounded-md shadow-md p-4 w-5/6 lg:w-3/4 lg:max-w-2xl h-96"
         prop.children [
-            Html.ol [
-                prop.className "list-decimal ml-6"
-                prop.children [
-                    for todo in model.Todos do
-                        Html.li [ prop.className "my-1"; prop.text todo.Description ]
+            AgGrid.grid [
+
+                AgGrid.rowData model.Todos
+                AgGrid.columnDefs [
+
+                    ColumnDef.create<string> [
+                        ColumnDef.headerName "Task"
+                        ColumnDef.valueGetter (fun x -> x.Description)
+                    ]
+                    ColumnDef.create<System.DateTime> [
+                        ColumnDef.headerName "Created"
+                        ColumnDef.valueGetter (fun x -> x.Created)
+                    ]
                 ]
             ]
-
             todoAction model dispatch
         ]
     ]
